@@ -1,0 +1,17 @@
+/**
+ * @author Aymane EL IDRISSI
+ */
+
+body {
+    background-color: white;
+    color: black;
+}
+
+h1 {
+    color: red;
+}
+
+h6 {
+    color: red;
+    text-decoration: underline;
+}

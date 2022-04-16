@@ -1,0 +1,138 @@
+{% extends "base.html.twig" %}
+{# /**
+ * @author Mohamed BENYAGOUB
+ */ #}
+{% block Liens %}
+    <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link accBtn" href="#">Liens</a>
+        </li>
+    </ul>
+{% endblock %}
+
+{% block liensURL %}
+<div style="display:none;" id="liensURL">
+        <a href="{{path("Project")}}" class="btn btn-dark btnLink">Vision des Projets</a>
+    {% if is_granted("ROLE_ADMIN") %}
+        <a href="{{path("admin")}}" class="btn btn-secondary btnLink mb-2">Admin (Admin)</a>
+    {% endif %}
+    {% if is_granted("ROLE_PROJECT_CHEF") %}
+        <a href="{{path("Project_Manager2")}}" class="btn btn-success btnLink mb-2">Création Task (chef de projet)</a>
+    {% endif %}
+    {% if is_granted("ROLE_EQUIPE_CHEF") %}
+        <a href="{{path("chefEquipe")}}" class="btn btn-warning btnLink mb-2">Administration de l'équipe (chef équipe)</a>
+        <a href="{{path("addMembers")}}" class="btn btn-warning btnLink mb-2">Ajouter des membres à l'équipe (chef équipe)</a>
+    {% endif %}
+    <a href='{{path("app_logout")}}' class="btn btn-info btnLink mb-2">LogOut</a>
+</div>
+{% endblock %}
+
+{% block body %}
+
+{% if tasks %}
+
+<div id="tableauTasks">
+    <table class="table table-hover" style="max-width: 850px;">
+    <thead>
+        <tr>
+        <th scope="col">Id</th>
+        <th scope="col">Projet</th>
+        <th scope="col">Titre</th>
+        <th scope="col">Description</th>
+        <th scope="col">Date début</th>
+        <th scope="col" style="min-width: 110px;">Date fin</th>
+        <th scope="col">Deadline</th>
+        <th scope="col">Etat</th>
+        <th scope="col"></th>
+
+        </tr>
+    </thead>
+    <tbody>
+
+        {% for task in tasks %}
+        <tr>
+        <th scope="row">{{task.id}}</th>
+        <th scope="row">{{task.projectId.title}}</th>
+        <td scope="row">{{task.title}}</td>
+        <td>{{task.description}}</td>
+        <td>{{task.dateInit|date('d/m/Y')}}</td>
+        <td class = "date-fin-task-{{task.id}}">{% if task.dateFin != null %}
+                {{task.dateFin|date('d/m/Y')}}</td>
+            {% else %}
+            --/--/----
+            {% endif %}
+        <td>{{task.deadline|date('d/m/Y')}}</td>
+        <td class = "etat-task-{{task.id}}">{% if task.done %}
+                V 
+            {% else %} 
+                X 
+            {% endif %}</td>
+        <td>{% if task.done %}
+                <button type="button" class="{{task.Id}} btn btn-outline-danger">Done</button>
+            {% else %}
+                <button type="button" class="{{task.Id}} btn btn-outline-success">Done</button>
+            {% endif %}
+        </td>       
+        </tr>
+        
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% else %}     
+<div class="alert alert-dismissible alert-warning">
+        <h4 class="alert-heading">Attention !</h4>
+        <p class="mb-0">Aucune tâche trouvée. Veuillez réessayer plus tard. Merci bien !</p>
+</div>  
+{% endif %}
+
+{% endblock %}
+
+{% block javascript %}
+    {% verbatim %}
+    <script>
+    $( document ).ready(function() {
+        
+        
+        $( ".btn-outline-success, .btn-outline-danger" ).click(function() {
+            
+            var idTask = this.classList[0];
+            var btnClicked = this;
+            
+            if(confirm("Voulez vous vraiment effectuer cette action ?")){
+                $.ajax('/task/'.concat(idTask), 
+                {
+                    method: 'get',
+                    dataType: 'json',
+                    success: function(response) {
+                        console.log(response);
+                        if(response.etatTask){
+                            $(".date-fin-task-".concat(idTask)).text(response.date);
+                            $(".etat-task-".concat(idTask)).text("V")
+                        }
+                        else{
+                            $(".date-fin-task-".concat(idTask)).text("--/--/----");
+                            $(".etat-task-".concat(idTask)).text("X")
+
+                        }
+                        $(btnClicked).toggleClass('btn-outline-danger').toggleClass('btn-outline-success');
+                    }
+                });  
+            }
+        });
+        
+        $( ".btnToggle" ).click(function() {
+            $(".DoneProject").closest(".ProjectCard").toggle("slow");
+        }); 
+
+        
+        $( ".accBtn" ).click(function() {
+            $("#liensURL").toggle("slow");
+        }); 
+        
+    });
+    </script>
+    {% endverbatim %}
+{% endblock %}  
+

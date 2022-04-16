@@ -1,0 +1,261 @@
+{% extends "base.html.twig" %}
+{# /**
+ * @author Mohamed BENYAGOUB
+ */ #}
+{% block title %}Projets{% endblock %}
+
+{% block toggle %}
+<div class=" form-check form-switch" style= 'margin-left: 50px'>
+    <input class="form-check-input btnToggle"  type="checkbox" id="flexSwitchCheckChecked" checked="">
+    <label class="form-check-label " for="flexSwitchCheckChecked">Afficher projets finis</label>
+</div>                    
+{% endblock %}
+
+{% block Liens %}
+    <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link accBtn" href="#">Liens</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link FilterBtn" href="#">Filtres</a>
+        </li>
+    </ul>
+{% endblock %}
+
+{% block filtres %}
+<div style="display:none;" id="filtres">
+    <form method="post">
+        <div class="row">
+            <div class="form-group col-6">
+                <input class="form-control " type="text" name="name" placeholder="Search" value="{{name}}">
+            </div>
+            <div class="form-group col-6">
+                <select name="searchBy" class="form-select" style="width:200px">
+                    <option value="manager">Par nom Manager</option>
+                    <option value="project">Par nom de projet</option>
+                    <option value="task">Par nom de tache</option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="form-group col-6">
+                <label for="dateDebut" class="form-label mt-2">Date de début</label>
+            </div>
+            <div class="form-group col-6">
+                <label for="dateFin" class="form-label mt-2">Date de fin</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-6">
+                <input type="date" class="form-control" name="dateDebut" id="dateDebut" aria-describedby="date Help">
+            </div>
+            <div class="form-group col-6">
+                <input type="date" class="form-control" name="dateFin" id="dateFin" aria-describedby="date Help">
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-9 mt-4">
+                <select name="orderBy" class="form-select">
+                    <option value="dateAsc">Par date croissante</option>
+                    <option value="dateDesc">Par date décroissante</option>
+                    <option value="alphaAsc">Par ordre Alphabétique croissant</option>
+                    <option value="alphaDesc">Par ordre Alphabétique décroissant</option>
+                </select>
+            </div>
+            <div class="form-group col-2 mt-4">
+                <button class= "btn btn-secondary" type="submit">Search</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block liensURL %}
+<div style="display:none;" id="liensURL">
+    {% if not is_granted("ROLE_ADMIN") %} 
+        <a href="{{path("Task")}}" class="btn btn-dark btnLink mb-2">Mes Tâches (User)</a>
+    {% endif %}
+    {% if is_granted("ROLE_ADMIN") %}
+        <a href="{{path("admin")}}" class="btn btn-secondary btnLink mb-2">Admin (Admin)</a>
+    {% endif %}
+    {% if is_granted("ROLE_PROJECT_CHEF") %}
+        <a href="{{path("Project_Manager2")}}" class="btn btn-success btnLink mb-2">Création Task (chef de projet)</a>
+    {% endif %}
+    {% if is_granted("ROLE_EQUIPE_CHEF") %}
+        <a href="{{path("chefEquipe")}}" class="btn btn-warning btnLink mb-2">Administration de l'équipe (chef équipe)</a>
+        <a href="{{path("addMembers")}}" class="btn btn-warning btnLink mb-2">Ajouter des membres à l'équipe (chef équipe)</a>
+    {% endif %}
+    <a href='{{path("app_logout")}}' class="btn btn-info btnLink mb-2">LogOut</a>
+</div>
+{% endblock %}
+
+{% block body %}
+<div class="row justify-content-md-center m-3" >
+    {% for project in projects %}
+    <div class="card-header-show col-xs-12 col-xl-4 mb-3">
+        <div class="card border-primary ProjectCard">
+            {# Nom du Manager en charge du Projet #}
+            <div class="card-header d-flex justify-content-between align-items-center">
+                Nom du Manager : 
+                {% for user in users %}
+                    {% if user.Id == project.managerId.Id %} {{user.name}} {% endif %}
+                {% endfor %}
+
+                {% set break = false %}
+                {% for task in project.tasks %}
+                    {% if not task.done and not break %}
+                        <span class="badge badge-project-{{project.Id}} rounded-pill bg-danger">état</span>
+                        {% set break = true %}
+                    {% endif %}
+                {% else %}
+                    <span class="badge badge-project-{{project.Id}} rounded-pill bg-warning">état</span>  
+                    {% set break = true %}
+                {% endfor %}
+                {% if not break %}
+                    <span class="badge badge-project-{{project.Id}} rounded-pill bg-success DoneProject">état</span>
+                {% endif %}
+            </div>
+
+            <div class="card-body">
+                {# Titre et description du projet #}
+                <h4 class="card-title">{{project.title}}</h4>
+                <p class="card-text"> {{project.description}}</p>
+
+                {# Liste des taches avec état d'avancement #}
+                <p class="card-text"> Tâches :</p>
+
+                <div class="overflow-scroll" style="height:150px;">
+                {% for task in project.tasks %}
+
+                    
+                    <div class="row" style = "margin:0px 15px;">
+
+                        <button type="button" class="btn btn-light border border-secondary" data-toggle="modal" data-target="#exampleModal{{task.id}}">
+                            {{task.title}}
+                            {% if task.done %}
+                                <span class="badge {{task.Id}} rounded-pill bg-success">état</span>
+                            {% else %}
+                                <span class="badge {{task.Id}} rounded-pill bg-danger">état</span>
+                            {% endif %}  
+                        </button>           
+                    </div>
+
+                    <div class="modal fade" id="exampleModal{{task.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel{{task.id}}">{{task.title}}</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                    <p class="task-items"><strong> Personne en charge de la tâche : </strong>
+                                    {% if task.userId != null %}
+                                        {{task.userId.Name}} {{task.userId.Prenom}}
+                                    {% else %}
+                                    ----    
+                                    {% endif %}
+                                    
+                                    </p>
+                                    <p class="task-items" style="margin-bottom:10px;"><strong> Description : </strong> {{task.description}}</p>
+                                    <p class="task-items" style="margin-bottom:0px;"><strong> Date début : </strong> {{task.dateInit|date('d/m/Y')}} </p>
+                                    <p class="task-items date-fin-task-{{task.id}}" style="margin-bottom:0px;"><strong> Date fin : </strong> {% if task.dateFin != null  %} {{task.dateFin|date('d/m/Y')}} {% else %}---{% endif %} </p>
+                                    <p class="task-items"style="margin-bottom:0px;" ><strong> Deadline : </strong> {{task.deadline|date('d/m/Y')}} </p>
+                            </div>
+                            <div class="modal-footer">
+                                {% if task.done and ((task.userId != null and currentUser.id == task.userId.id) or is_granted("ROLE_ADMIN") or project.managerId.id == currentUser.id) %}
+                                <button type="button" class="{{task.Id}} btn btn-outline-danger">Done</button>
+                                {% else %}
+                                    {% if (task.userId != null and currentUser.id == task.userId.id) or is_granted("ROLE_ADMIN") or project.managerId.id == currentUser.id %}
+                                        <button type="button" class="{{task.Id}} btn btn-outline-success">Done</button>
+                                    {% endif %}
+                                {% endif %}                            
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% else %}
+                        <div class="alert alert-dismissible alert-warning">
+                            <h4 class="alert-heading">Attention !</h4>
+                            <p class="mb-0">Aucune tâche trouvée. Veuillez réessayer plus tard. Merci bien !</p>
+                        </div>
+                {% endfor %}
+                </div>
+
+                {# Dates importantes #}
+                <p class="card-text" style="margin-bottom: 0px; margin-top: 10px;"> Date de début :{{project.dateInit|date('d/m/Y')}} </p>
+                <p class="card-text date-fin-project-{{project.Id}}" style="margin-bottom: 0px;"> Date de fin : {% if project.dateFin != null  %}{{project.dateFin|date('d/m/Y')}}{% else %}---{% endif %} </p>
+                <p class="card-text" style="margin-bottom: 0px;"> Deadline :  {{project.deadline|date('d/m/Y')}} </p>
+            </div>
+        </div>
+    </div>
+        
+    {% else %}
+        <div class="alert alert-dismissible alert-warning">
+            <h4 class="alert-heading">Attention !</h4>
+            <p class="mb-0">Aucun projet trouvé. Veuillez réessayer plus tard. Merci bien !</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block javascript %}
+    {% verbatim %}
+    <script>
+    $( document ).ready(function() {
+        $( ".btn-outline-success, .btn-outline-danger" ).click(function() {
+
+            var idTask = this.classList[0];
+            var btnClicked = this;
+            
+            if(confirm("Voulez vous vraiment effectuer cette action ?")){
+                $.ajax('/task/'.concat(idTask), 
+                {
+                    method: 'get',
+                    dataType: 'json',
+                    success: function(response) {
+                        console.log(response);
+                        if(response.cond){
+                            $(".badge-project-".concat(response.id)).removeClass('bg-danger').addClass('bg-success').addClass("DoneProject");
+                            $(".date-fin-project-".concat(response.id)).text("Date de fin :".concat(response.date));
+                        }
+                        else{
+                            $(".badge-project-".concat(response.id)).addClass('bg-danger').removeClass('bg-success').removeClass("DoneProject");
+                            $(".date-fin-project-".concat(response.id)).text("Date de fin : ---");
+                        }
+                        if(response.etatTask){
+                            $(".date-fin-task-".concat(idTask)).html("<strong>Date de fin :</strong>".concat(response.date));
+                        }
+                        else{
+                            $(".date-fin-task-".concat(idTask)).html("<strong>Date de fin :</strong>---");
+                        }
+                        $(btnClicked).toggleClass('btn-outline-danger').toggleClass('btn-outline-success');
+                        $(".bg-danger.".concat(idTask," , .bg-success.",idTask)).toggleClass('bg-danger').toggleClass('bg-success');
+                    }
+                });  
+            }
+        });
+        
+        $( ".btnToggle" ).click(function() {
+            $(".DoneProject").closest(".card-header-show").toggle('medium');
+        }); 
+
+        $( ".accBtn" ).click(function() {
+            $("#filtres").hide('slow');
+            $("#liensURL").toggle("slow");
+        }); 
+
+        $( ".FilterBtn" ).click(function() {
+            $("#liensURL").hide('slow');
+            $("#filtres").toggle("slow");
+        }); 
+        
+    });
+    </script>
+    {% endverbatim %}
+{% endblock %}  

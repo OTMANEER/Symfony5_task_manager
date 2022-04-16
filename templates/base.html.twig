@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+{# /**
+ * @author Mohamed BENYAGOUB
+ */ #}
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}Welcome!{% endblock %}</title>
+
+        {% block stylesheets %}
+        <link type="text/css" rel="stylesheet" href="assets/css/main.css" />
+        <link type="text/css" rel="stylesheet" href="assets/css/second.css" />
+        {% endblock %}
+    </head>
+    <body>
+    {% block header %}
+        <header>
+            <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="#">Project Management</a>
+
+                    {% block Liens %}
+                    {% endblock %}
+
+                    <div id="navbarColor01">
+                    {% block search %}
+                    {% endblock %}
+
+                    {% block filtres %}
+                    {% endblock %}
+
+                    {% block liensURL %}
+                    {% endblock %}
+
+                    </div>
+                </div>
+            </nav>
+        </header>
+    {% endblock %}
+        {% block toggle %}
+        {% endblock %}
+
+        {% block body %}
+        {% endblock %}
+
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+        
+        {% block javascript %}
+        {% endblock %}   
+    </body>
+</html>

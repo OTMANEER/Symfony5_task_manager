@@ -1,0 +1,22 @@
+{# /**
+ * @author Aymane EL IDRISSI 
+ */ #}
+{% extends 'base.html.twig' %}
+{% block title %}Page not found{% endblock %}
+
+{% block stylesheets %}
+        <link type="text/css" rel="stylesheet" media="all" href="assets/css/third.css" />
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">     
+{% endblock %}
+
+{% block body %}
+    <div class="w3-display-middle">
+        <h1 class="w3-jumbo w3-animate-top w3-center"><code>Page not Found !</code></h1>
+        <hr class="w3-border-white w3-animate-left" style="margin:auto;width:50%">
+        <h3 class="w3-center w3-animate-right">Look like you're lost</h3>
+        <h3 class="w3-center w3-animate-right">The page you are looking for is not avaible!</h3>
+        <h3 class="w3-center w3-animate-zoom">😕😕😕😕</h3>
+        <h6 class="w3-center w3-animate-zoom">Error Code : {{ status_code }}</h6>
+        <h6 class="w3-center w3-animate-zoom">Error Message : {{ status_text }}</h6>
+    </div>
+{% endblock %}
